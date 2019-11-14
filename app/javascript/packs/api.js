@@ -7,11 +7,7 @@ import axios from 'axios';
 //   });
 // }
 
-const listTasks = async () => {
+export const listTasks = async () => {
   const res = await axios.get('/tasks.json');
   return res.data;
 };
-
-listTasks().then(function(response) {
-  console.log(response);
-});

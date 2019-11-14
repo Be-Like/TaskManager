@@ -1,5 +1,7 @@
 import Vue from 'vue';
 
+const Api = require('./api');
+
 document.addEventListener('DOMContentLoaded', () => {
   var app = new Vue({
     el: '#app',
@@ -25,32 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     },
     data: {
-      tasks: [
-        {
-          id: 1,
-          name: 'Todo 1',
-          description: 'This is a todo',
-          completed: true
-        },
-        {
-          id: 2,
-          name: 'Todo 2',
-          description: 'This is a todo',
-          completed: false
-        },
-        {
-          id: 3,
-          name: 'Todo 3',
-          description: 'Random description',
-          completed: true
-        },
-        {
-          id: 4,
-          name: 'Todo 4',
-          description: 'This is a todo',
-          completed: true
-        }
-      ],
+      tasks: [],
       task: {},
       message: '',
       action: 'create'
@@ -72,6 +49,11 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     },
     methods: {
+      listTasks: function() {
+        Api.listTasks().then(function(res) {
+          app.tasks = res;
+        });
+      },
       toggleDone: function(event, id) {
         event.stopImmediatePropagation();
         let task = this.tasks.find(item => item.id === id);
@@ -138,6 +120,9 @@ document.addEventListener('DOMContentLoaded', () => {
         this.clear();
         this.message = `Task ${taskId} created.`;
       }
+    },
+    beforeMount() {
+      this.listTasks();
     }
   });
 });
