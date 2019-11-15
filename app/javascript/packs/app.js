@@ -54,22 +54,29 @@ document.addEventListener('DOMContentLoaded', () => {
           app.tasks = res;
         });
       },
-      toggleDone: function(event, id) {
+      toggleDone: async function(event, id) {
         event.stopImmediatePropagation();
         let task = this.tasks.find(item => item.id === id);
 
         if (task) {
           task.completed = !task.completed;
-          console.log('task toggled');
-          this.message = `Task ${id} updated.`;
+          this.task = task;
+
+          const res = await Api.updateTask(this.task);
+          this.listTasks();
+          this.clear();
+
+          let status = res.completed ? 'completed' : 'in progress';
+          this.message = `Task ${res.id} is ${status}.`;
         }
       },
-      deleteTask: function(event, id) {
+      deleteTask: async function(event, id) {
         event.stopImmediatePropagation();
 
         let taskIndex = this.tasks.findIndex(item => item.id == id);
 
         if (taskIndex > -1) {
+          await Api.deleteTask(id);
           this.$delete(this.tasks, taskIndex);
           this.message = `Task ${id} deleted.`;
         }
@@ -87,38 +94,36 @@ document.addEventListener('DOMContentLoaded', () => {
           };
         }
       },
-      updateTask: function(event, id) {
+      updateTask: async function(event, id) {
         event.stopImmediatePropagation();
 
-        let task = this.tasks.find(item => item.id === id);
-
-        if (task) {
-          task.name = this.task.name;
-          task.description = this.task.description;
-          task.completed = this.task.completed;
-          this.clear();
-          this.message = `Task ${id} updated.`;
-        }
+        const res = await Api.updateTask(this.task);
+        this.listTasks();
+        this.clear();
+        this.message = `Task ${res.id} updated.`;
       },
       clear: function() {
         this.task = {};
         this.action = 'create';
         this.message = '';
       },
-      createTask: function(event) {
+      createTask: async function(event) {
         if (!this.task.completed) {
           this.task.completed = false;
         } else {
           this.task.completed = true;
         }
 
-        let taskId = this.nextId;
+        // Api.createTask(this.task).then(function(res) {
+        //   app.listTasks();
+        //   app.clear();
+        //   app.message = `Task ${res.id} created.`;
+        // });
 
-        this.task.id = taskId;
-        let newTask = Object.assign({}, this.task);
-        this.tasks.push(newTask);
+        const res = await Api.createTask(this.task);
+        this.listTasks();
         this.clear();
-        this.message = `Task ${taskId} created.`;
+        app.message = `Task ${res.id} created.`;
       }
     },
     beforeMount() {
